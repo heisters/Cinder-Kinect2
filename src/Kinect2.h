@@ -62,7 +62,6 @@ ci::Surface8u									colorizeBodyIndex( const ci::Channel8u& bodyIndexChannel )
 ci::Color8u										getBodyColor( uint64_t index );
 size_t											getDeviceCount();
 std::map<size_t, std::string>					getDeviceMap();
-std::string										getStatusMessage( KinectStatus status );
 
 ci::Vec2i										mapBodyCoordToColor( const ci::Vec3f& v, ICoordinateMapper* mapper );
 ci::Vec2i										mapBodyCoordToDepth( const ci::Vec3f& v, ICoordinateMapper* mapper );
@@ -212,7 +211,6 @@ public:
 	ICoordinateMapper*							getCoordinateMapper() const;
 	const DeviceOptions&						getDeviceOptions() const;
 	const Frame&								getFrame() const;
-	KinectStatus								getStatus() const;
 protected:
 	Device();
 
@@ -227,7 +225,6 @@ protected:
 
 	DeviceOptions								mDeviceOptions;
 	Frame										mFrame;
-	KinectStatus								mStatus;
 public:
 
 	//////////////////////////////////////////////////////////////////////////////////////////////

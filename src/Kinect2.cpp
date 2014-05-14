@@ -160,36 +160,6 @@ map<size_t, string> getDeviceMap()
 	return deviceMap;
 }
 
-string getStatusMessage( KinectStatus status )
-{
-	switch ( status ) {
-	case KinectStatus::KinectStatus_Connected:
-		return "Connected";
-	case KinectStatus::KinectStatus_DeviceNotGenuine:
-		return "Device not genuine";
-	case KinectStatus::KinectStatus_DeviceNotSupported:
-		return "Device not supported";
-	case KinectStatus::KinectStatus_Disconnected:
-		return "Disconnected";
-	case KinectStatus::KinectStatus_Error:
-		return "Error";
-	case KinectStatus::KinectStatus_Initializing:
-		return "Initializing";
-	case KinectStatus::KinectStatus_InsufficientBandwidth:
-		return "Insufficient bandwidth";
-	case KinectStatus::KinectStatus_InUseAsExclusive:
-		return "In use as exclusive";
-	case KinectStatus::KinectStatus_InUseAsShared:
-		return "In use as shared";
-	case KinectStatus::KinectStatus_NotPowered:
-		return "Not powered";
-	case KinectStatus::KinectStatus_NotReady:
-		return "Not ready";
-	default:
-		return "Undefined";
-	}
-}
-
 Vec2i mapBodyCoordToColor( const Vec3f& v, ICoordinateMapper* mapper )
 {
 	CameraSpacePoint cameraSpacePoint;
@@ -578,7 +548,7 @@ DeviceRef Device::create()
 }
 
 Device::Device()
-: mFrameReader( 0 ), mSensor( 0 ), mCoordinateMapper( 0 ), mStatus( KinectStatus::KinectStatus_Undefined )
+: mFrameReader( 0 ), mSensor( 0 ), mCoordinateMapper( 0 )
 {
 	App::get()->getSignalUpdate().connect( bind( &Device::update, this ) );
 }
@@ -601,11 +571,6 @@ const DeviceOptions& Device::getDeviceOptions() const
 const Frame& Device::getFrame() const
 {
 	return mFrame;
-}
-
-KinectStatus Device::getStatus() const
-{
-	return mStatus;
 }
 
 void Device::start( const DeviceOptions& deviceOptions )
@@ -719,10 +684,6 @@ void Device::stop()
 
 void Device::update()
 {
-	if ( mSensor != 0 ) {
-		mSensor->get_Status( &mStatus );
-	}
-
 	if ( mFrameReader == 0 ) {
 		return;
 	}
@@ -923,7 +884,7 @@ void Device::update()
 				hr = bodyIndexFrameDescription->get_Height( &bodyIndexHeight );
 			}
 			if ( SUCCEEDED( hr ) ) {
- 				hr = bodyIndexFrame->AccessUnderlyingBuffer( &bodyIndexBufferSize, &bodyIndexBuffer );
+				hr = bodyIndexFrame->AccessUnderlyingBuffer( &bodyIndexBufferSize, &bodyIndexBuffer );
 			}
 			if ( SUCCEEDED( hr ) ) {
 				bodyIndexChannel = Channel8u( bodyIndexWidth, bodyIndexHeight );

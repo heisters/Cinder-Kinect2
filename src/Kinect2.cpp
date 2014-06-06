@@ -227,6 +227,20 @@ Channel16u mapDepthFrameToColor( const Channel16u& depth, ICoordinateMapper* map
 	return channel;
 }
 
+Vec3f mapDepthCoordToBody( const Vec2i& v, uint16_t depth, ICoordinateMapper* mapper )
+{
+	DepthSpacePoint depthSpacePoint;
+	depthSpacePoint.X = (float)v.x;
+	depthSpacePoint.Y = (float)v.y;
+
+	CameraSpacePoint cameraSpacePoint;
+	long hr = mapper->MapDepthPointToCameraSpace( depthSpacePoint, depth, &cameraSpacePoint );
+	if ( SUCCEEDED( hr ) ) {
+		return Vec3f( toVec3f( cameraSpacePoint ) );
+	}
+	return Vec3f();
+}
+
 Quatf toQuatf( const Vector4& v )
 {
 	return Quatf( v.w, v.x, v.y, v.z );

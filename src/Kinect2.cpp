@@ -554,6 +554,11 @@ int64_t Frame::getTimeStamp() const
 	return mTimeStamp;
 }
 
+const Vec4f& Frame::getFloorClipPlane() const
+{
+	return mFloorClipPlane;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 DeviceRef Device::create()
@@ -797,6 +802,7 @@ void Device::update()
 		std::vector<Body> bodies;
 		int64_t bodyTime										= 0L;
 		IBody* kinectBodies[ BODY_COUNT ]						= { 0 };
+		Vec4f floorClipPlane									= Vec4f::zero();
 		
 		Channel8u bodyIndexChannel;
 		IFrameDescription* bodyIndexFrameDescription			= 0;
@@ -852,7 +858,12 @@ void Device::update()
 				hr = bodyFrame->GetAndRefreshBodyData( BODY_COUNT, kinectBodies );
 			}
 			if ( SUCCEEDED( hr ) ) {
-				for ( uint8_t i = 0; i < 6; ++i ) {
+				Vector4 v;
+				hr = bodyFrame->get_FloorClipPlane( &v );
+				floorClipPlane = toVec4f( v );
+			}
+			if ( SUCCEEDED( hr ) ) {
+				for ( uint8_t i = 0; i < BODY_COUNT; ++i ) {
 					IBody* kinectBody = kinectBodies[ i ];
 					if ( kinectBody != 0 ) {
 						uint8_t isTracked	= false;
@@ -1014,6 +1025,7 @@ void Device::update()
 			mFrame.mDeviceId					= mDeviceOptions.getDeviceId();
 			mFrame.mSurfaceColor				= colorSurface;
 			mFrame.mTimeStamp					= timeStamp;
+			mFrame.mFloorClipPlane				= floorClipPlane;
 		}
 
 		if ( bodyIndexFrameDescription != 0 ) {

@@ -179,6 +179,7 @@ public:
 	const ci::Channel16u&						getInfrared() const;
 	const ci::Channel16u&						getInfraredLongExposure() const;
 	long long									getTimeStamp() const;
+	const ci::Vec4f&							getFloorClipPlane() const;
 protected:
 	Frame( long long frameId, const std::string& deviceId, const ci::Surface8u& color, 
 		const ci::Channel16u& depth, const ci::Channel16u& infrared, 
@@ -192,6 +193,7 @@ protected:
 	ci::Channel16u								mChannelInfraredLongExposure;
 	ci::Surface8u								mSurfaceColor;
 	long long									mTimeStamp;
+	ci::Vec4f									mFloorClipPlane;
 
 	friend class								Device;
 };

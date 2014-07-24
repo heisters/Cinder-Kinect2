@@ -69,6 +69,7 @@ ci::Vec2i										mapBodyCoordToDepth( const ci::Vec3f& v, ICoordinateMapper* m
 ci::Vec2i										mapDepthCoordToColor( const ci::Vec2i& v, uint16_t depth, ICoordinateMapper* mapper );
 ci::Channel16u									mapDepthFrameToColor( const ci::Channel16u& depth, ICoordinateMapper* mapper );
 ci::Vec3f										mapDepthCoordToBody( const ci::Vec2i& v, uint16_t depth, ICoordinateMapper* mapper );
+ci::Surface32f                                  mapDepthFrameToBody( const ci::Channel16u& depth, ICoordinateMapper* mapper );
 
 ci::Quatf										toQuatf( const Vector4& v );
 ci::Vec2f										toVec2f( const PointF& v );

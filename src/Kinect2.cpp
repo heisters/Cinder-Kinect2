@@ -241,6 +241,28 @@ Vec3f mapDepthCoordToBody( const Vec2i& v, uint16_t depth, ICoordinateMapper* ma
 	return Vec3f();
 }
 
+Surface32f mapDepthFrameToBody( const ci::Channel16u& depth, ICoordinateMapper* mapper )
+{
+    size_t numPoints = depth.getWidth() * depth.getHeight();
+    Surface32f surface( depth.getWidth(), depth.getHeight(), false /* no alpha */, SurfaceChannelOrder::RGB );
+    vector<CameraSpacePoint> cameraSpacePoints( numPoints );
+    long hr = mapper->MapDepthFrameToCameraSpace( (UINT)numPoints, depth.getData(), numPoints, &cameraSpacePoints[0] );
+    if ( SUCCEEDED( hr ) ) {
+        Surface32f::Iter iter = surface.getIter();
+        while ( iter.line() ) {
+            while ( iter.pixel() ) {
+                size_t i = iter.getPos().y * iter.getWidth() + iter.getPos().x;
+                CameraSpacePoint &p = cameraSpacePoints[i];
+                iter.r() = p.X;
+                iter.g() = p.Y;
+                iter.b() = p.Z;
+            }
+        }
+    }
+    return surface;
+}
+
+
 Quatf toQuatf( const Vector4& v )
 {
 	return Quatf( v.w, v.x, v.y, v.z );

@@ -108,58 +108,6 @@ Color8u getBodyColor( uint64_t index )
 	}
 }
 
-size_t getDeviceCount()
-{
-	size_t count								= 0;
-	IKinectSensorCollection* sensorCollection	= 0;
-	long hr = GetKinectSensorCollection( &sensorCollection );
-	if ( SUCCEEDED( hr ) && sensorCollection != 0 ) {
-		IEnumKinectSensor* sensorEnum = 0;
-		hr = sensorCollection->get_Enumerator( &sensorEnum );
-		if ( SUCCEEDED( hr ) || sensorEnum != 0 ) {
-			size_t i = 0;
-			while ( SUCCEEDED( hr ) && i < 8 ) {
-				IKinectSensor* sensor = 0;
-				hr = sensorEnum->GetNext( &sensor );
-				if ( sensor != 0 ) {
-					++count;
-				}
-				++i;
-			}
-		}
-	}
-	return count;
-}
-
-map<size_t, string> getDeviceMap()
-{
-	map<size_t, string> deviceMap;
-	IKinectSensorCollection* sensorCollection	= 0;
-	long hr = GetKinectSensorCollection( &sensorCollection );
-	if ( SUCCEEDED( hr ) && sensorCollection != 0 ) {
-		IEnumKinectSensor* sensorEnum = 0;
-		hr = sensorCollection->get_Enumerator( &sensorEnum );
-		if ( SUCCEEDED( hr ) || sensorEnum != 0 ) {
-			size_t i = 0;
-			while ( SUCCEEDED( hr ) && i < 8 ) {
-				IKinectSensor* sensor = 0;
-				hr = sensorEnum->GetNext( &sensor );
-				if ( sensor != 0 ) {
-					wchar_t wid[ 48 ];
-					if ( SUCCEEDED( sensor->get_UniqueKinectId( 48, wid ) ) ) {
-						string id = wcharToString( wid );
-						if ( !id.empty() ) {
-							deviceMap[ i ] = string( id );
-						}
-					}
-				}
-				++i;
-			}
-		}
-	}
-	return deviceMap;
-}
-
 Vec2i mapBodyCoordToColor( const Vec3f& v, ICoordinateMapper* mapper )
 {
 	CameraSpacePoint cameraSpacePoint;
@@ -308,7 +256,7 @@ string wcharToString( wchar_t* v )
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 DeviceOptions::DeviceOptions()
-: mDeviceIndex( 0 ), mDeviceId( "" ), mEnabledAudio( false ), mEnabledBody( false ), 
+: mDeviceId( "" ), mEnabledAudio( false ), mEnabledBody( false ), 
 mEnabledBodyIndex( false ), mEnabledColor( true ), mEnabledDepth( true ), 
 mEnabledInfrared( false ), mEnabledInfraredLongExposure( false )
 {
@@ -362,20 +310,9 @@ DeviceOptions& DeviceOptions::setDeviceId( const string& id )
 	return *this;
 }
 
-DeviceOptions& DeviceOptions::setDeviceIndex( int32_t index )
-{
-	mDeviceIndex = index;
-	return *this;
-}
-
 const string& DeviceOptions::getDeviceId() const
 {
 	return mDeviceId;
-}
-
-int32_t	 DeviceOptions::getDeviceIndex() const
-{
-	return mDeviceIndex;
 }
 
 bool DeviceOptions::isAudioEnabled() const
@@ -619,48 +556,24 @@ void Device::start( const DeviceOptions& deviceOptions )
 	long hr = S_OK;
 	mDeviceOptions = deviceOptions;
 	
-	IKinectSensorCollection* sensorCollection = 0;
-	hr = GetKinectSensorCollection( &sensorCollection );
-	if ( FAILED( hr ) || sensorCollection == 0 ) {
-		throw ExcDeviceNotAvailable( hr );
-	}
+    hr = GetDefaultKinectSensor( &mSensor );
+    if ( FAILED( hr ) )
+    {
+        throw ExcDeviceNotAvailable( hr );
+    }
 
-	//sensorCollection->SubscribeCollectionChanged( &Device::onSensorCollectionChanged );
-	IEnumKinectSensor* sensorEnum = 0;
-	hr = sensorCollection->get_Enumerator( &sensorEnum );
-	if ( FAILED( hr ) || sensorEnum == 0 ) {
-		throw ExcDeviceEnumerationFailed( hr );
-	}
-
-	hr			= S_OK;
-	int32_t i	= 0;
-
-	while ( SUCCEEDED( hr ) && i < 8 ) { // TODO find actual max device count
-		hr = sensorEnum->GetNext( &mSensor );
-		if ( mSensor != 0 ) {
-			string id = "";
-			wchar_t wid[ 48 ];
-			if ( SUCCEEDED( mSensor->get_UniqueKinectId( 48, wid ) ) ) {
-				id = wcharToString( wid );
-			}
-			if ( mDeviceOptions.getDeviceId().empty() ) {
-				if ( mDeviceOptions.getDeviceIndex() == i ) {
-					mDeviceOptions.setDeviceId( id );
-					break;
-				}
-			} else {
-				if ( mDeviceOptions.getDeviceId() == id ) {
-					mDeviceOptions.setDeviceIndex( i );
-					break;
-				}
-			}
-		}
-		++i;
-	}
 
 	if ( mSensor == 0 ) {
 		throw ExcDeviceInitFailed( hr, mDeviceOptions.getDeviceId() );
 	} else {
+        string id = "";
+        wchar_t wid[48];
+        if ( SUCCEEDED( mSensor->get_UniqueKinectId( 48, wid ) ) ) {
+            id = wcharToString( wid );
+            mDeviceOptions.setDeviceId( id );
+        }
+
+
 		hr = mSensor->Open();
 		if ( SUCCEEDED( hr ) ) {
 			hr = mSensor->get_CoordinateMapper( &mCoordinateMapper );

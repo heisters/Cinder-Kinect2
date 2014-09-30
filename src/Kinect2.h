@@ -60,8 +60,6 @@ ci::Channel8u									channel16To8( const ci::Channel16u& channel );
 ci::Surface8u									colorizeBodyIndex( const ci::Channel8u& bodyIndexChannel );
 
 ci::Color8u										getBodyColor( uint64_t index );
-size_t											getDeviceCount();
-std::map<size_t, std::string>					getDeviceMap();
 
 ci::Vec2i										mapBodyCoordToColor( const ci::Vec3f& v, ICoordinateMapper* mapper );
 ci::Vec2i										mapBodyCoordToDepth( const ci::Vec3f& v, ICoordinateMapper* mapper );
@@ -95,10 +93,8 @@ public:
 	DeviceOptions&								enableInfrared( bool enable = true );
 	DeviceOptions&								enableInfraredLongExposure( bool enable = true );
 	DeviceOptions&								setDeviceId( const std::string& id = "" ); 
-	DeviceOptions&								setDeviceIndex( int32_t index = 0 );
 
 	const std::string&							getDeviceId() const;
-	int32_t										getDeviceIndex() const;
 	bool										isAudioEnabled() const;
 	bool										isBodyEnabled() const;
 	bool										isBodyIndexEnabled() const;
@@ -108,7 +104,6 @@ public:
 	bool										isInfraredLongExposureEnabled() const;
 protected:
 	std::string									mDeviceId;
-	int32_t										mDeviceIndex;
 
 	bool										mEnabledAudio;
 	bool										mEnabledBody;
